@@ -16,6 +16,7 @@ def cadastrar_livro():
     if titulo and autor and ano.isdigit() and qtd.isdigit():
         biblioteca.cadastrar_livro(livro(titulo, autor, int(ano), int(qtd)))
         messagebox.showinfo("Sucesso", f"livro '{titulo}' cadastrado!")
+        resumo()
     else:
         messagebox.showwarning("Atenção, Preencha os campos corretamente.")
 
@@ -25,7 +26,7 @@ def cadastrar_usuario():
     email = entrada_email.get()
     id_usuario = entrada_id.get()
 
-    if "@hotmail" or "@Gmail" or "Yahoo" or "Email" not in email.lower():
+    if not "@" in email:
         messagebox.showwarning(
             "Atenção", "O email deve conter um domínio válido.")
         return
@@ -49,6 +50,14 @@ def listar_usuarios():
 
     messagebox.showinfo("Lista de usuario", "\n".join(
         usuario) if usuario else "Nenhum usuario cadastrado.")
+
+
+def resumo():
+    total_disponivel = sum(livro.quantidade for livro in biblioteca.livros)
+    total_emprestado = sum(len(u.livros_emprestados)
+                           for u in biblioteca.usuarios)
+    label_resumo.config(
+        text=f"📈Livros Disponíveis:{total_disponivel} || Livros Emprestados: {total_emprestado}")
 
 # ------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -94,5 +103,10 @@ tk.Button(root, text="Listar Livros",
           command=listar_livros).grid(row=9, column=1)
 tk.Button(root, text="Listar Usuarios",
           command=listar_usuarios).grid(row=10, column=1)
+label_resumo = tk.Label(
+    root, bd=1, anchor="w")
+label_resumo.grid(row=12, column=0, columnspan=2, sticky="we")
+
+resumo()
 
 root.mainloop()
