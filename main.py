@@ -6,6 +6,7 @@ from biblioteca import Biblioteca
 
 biblioteca = Biblioteca()
 
+# ------------------- Funções -------------------
 
 def cadastrar_livro():
     titulo = entrada_titulo.get()
@@ -15,11 +16,10 @@ def cadastrar_livro():
 
     if titulo and autor and ano.isdigit() and qtd.isdigit():
         biblioteca.cadastrar_livro(livro(titulo, autor, int(ano), int(qtd)))
-        messagebox.showinfo("Sucesso", f"livro '{titulo}' cadastrado!")
+        messagebox.showinfo("Sucesso", f"Livro '{titulo}' cadastrado!")
         resumo()
     else:
-        messagebox.showwarning("Atenção, Preencha os campos corretamente.")
-
+        messagebox.showwarning("Atenção", "Preencha os campos corretamente.")
 
 def cadastrar_usuario():
     nome = entrada_nome.get()
@@ -33,38 +33,62 @@ def cadastrar_usuario():
 
     if nome and email and id_usuario.isdigit():
         biblioteca.cadastrar_usuario(usuario(nome, email, int(id_usuario)))
-        messagebox.showinfo("Sucesso", f"Usuario '{nome}' cadastrado!")
+        messagebox.showinfo("Sucesso", f"Usuário '{nome}' cadastrado!")
     else:
-        messagebox.showwarning("Atenção, Preencha os campos corretamente.")
-
+        messagebox.showwarning("Atenção", "Preencha os campos corretamente.")
 
 def listar_livros():
-    livro = biblioteca.listar_livros()
-
+    livros = biblioteca.listar_livros()
     messagebox.showinfo("Lista de Livros", "\n".join(
-        livro) if livro else "Nenhum livro cadastrado.")
+        livros) if livros else "Nenhum livro cadastrado.")
 
 
 def listar_usuarios():
-    usuario = biblioteca.listar_usuarios()
-
-    messagebox.showinfo("Lista de usuario", "\n".join(
-        usuario) if usuario else "Nenhum usuario cadastrado.")
+    usuarios = biblioteca.listar_usuarios()
+    messagebox.showinfo("Lista de Usuários", "\n".join(
+        usuarios) if usuarios else "Nenhum usuário cadastrado.")
 
 
 def resumo():
     total_disponivel = sum(livro.quantidade for livro in biblioteca.livros)
-    total_emprestado = sum(len(u.livros_emprestados)
+    total_emprestado = sum(len(u.livros_emprestado)
                            for u in biblioteca.usuarios)
     label_resumo.config(
-        text=f"📈Livros Disponíveis:{total_disponivel} || Livros Emprestados: {total_emprestado}")
+        text=f"📈 Livros Disponíveis: {total_disponivel} || Livros Emprestados: {total_emprestado}"
+    )
 
-# ------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+def emprestar_livro():
+    id_usuario = entrada_id.get()
+    titulo = entrada_titulo.get()
+
+    if not id_usuario.isdigit() or not titulo:
+        messagebox.showwarning(
+            "Atenção", "Informe o ID do usuário e o título do livro.")
+        return
+
+    biblioteca.emprestar_livro(int(id_usuario), titulo)
+    resumo()
+
+
+def devolver_livro():
+    id_usuario = entrada_id.get()
+    titulo = entrada_titulo.get()
+
+    if not id_usuario.isdigit() or not titulo:
+        messagebox.showwarning(
+            "Atenção", "Informe o ID do usuário e o título do livro.")
+        return
+
+    biblioteca.devolver_livro(int(id_usuario), titulo)
+    resumo()
+
+# ------------------- Interface Tkinter -------------------
 
 root = tk.Tk()
 root.title("Biblioteca APP")
 
+# Cadastro de Livros
 tk.Label(root, text='Título').grid(row=0, column=0)
 entrada_titulo = tk.Entry(root)
 entrada_titulo.grid(row=0, column=1)
@@ -84,6 +108,7 @@ entrada_qtd.grid(row=3, column=1)
 tk.Button(root, text="Cadastrar Livro",
           command=cadastrar_livro).grid(row=4, column=1)
 
+# Cadastro de Usuários
 tk.Label(root, text='Nome').grid(row=5, column=0)
 entrada_nome = tk.Entry(root)
 entrada_nome.grid(row=5, column=1)
@@ -96,17 +121,24 @@ tk.Label(root, text='ID').grid(row=7, column=0)
 entrada_id = tk.Entry(root)
 entrada_id.grid(row=7, column=1)
 
-tk.Button(root, text="Cadastrar Usuario",
+tk.Button(root, text="Cadastrar Usuário",
           command=cadastrar_usuario).grid(row=8, column=1)
 
+# Botões de Listagem
 tk.Button(root, text="Listar Livros",
-          command=listar_livros).grid(row=9, column=1)
-tk.Button(root, text="Listar Usuarios",
-          command=listar_usuarios).grid(row=10, column=1)
-label_resumo = tk.Label(
-    root, bd=1, anchor="w")
-label_resumo.grid(row=12, column=0, columnspan=2, sticky="we")
+          command=listar_livros).grid(row=9, column=0)
+tk.Button(root, text="Listar Usuários",
+          command=listar_usuarios).grid(row=9, column=1)
 
+# Botões de Empréstimo/Devolução
+tk.Button(root, text="📕 Emprestar Livro",
+          command=emprestar_livro).grid(row=10, column=0)
+tk.Button(root, text="📗 Devolver Livro",
+          command=devolver_livro).grid(row=10, column=1)
+
+# Label de Resumo
+label_resumo = tk.Label(root, bd=1, anchor="w")
+label_resumo.grid(row=11, column=0, columnspan=2, sticky="we")
 resumo()
 
 root.mainloop()
